@@ -1,0 +1,1 @@
+trignoclient_ros/Sample[] sensor

@@ -1,0 +1,5 @@
+string query
+uint8 timeout  # timeout to abort query (wait for response) in SECONDS
+---
+bool success
+string answer

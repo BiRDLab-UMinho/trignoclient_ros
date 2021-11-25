@@ -1,0 +1,8 @@
+# trigno server address
+server_address = 127.0.0.1
+# emg & aux data ports (cf. Trigno SDK manual)
+# emg_data_port = 40051
+# aux_data_port = 40
+# tcp timeout
+connect_timeout = 5.0
+io_timeout = 1.0
