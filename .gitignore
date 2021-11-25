@@ -1,0 +1,6 @@
+*.log 
+*.bak
+*.old
+*.html
+doc/*
+build/*
