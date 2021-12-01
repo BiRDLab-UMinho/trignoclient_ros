@@ -17,7 +17,7 @@ namespace trigno::ros {
 ///             Additionally, a service to get information on current active sensors is advertised.
 ///             Under development, new wrapper services around *trignoclient* implementation may be added in the future.
 ///
-class Interface {
+class InterfaceWrapper {
  public:
     //--------------------------------------------------------------------------
     /// @brief      Client type.
@@ -29,14 +29,14 @@ class Interface {
     ///
     /// @param[in]  node    Handle to ROS node.
     /// @param[in]  client  Trigno client instance.
-    /// @param[in]  name    Name of data topic.
+    /// @param[in]  name    Namespace to advertise service(s). Defaults to "[*node* namespace]/interface".
     ///
-    Interface(NodeHandle* node, const Client* client, const std::string& name);
+    InterfaceWrapper(NodeHandle* node, const Client* client, const std::string& namespace = "interface");
 
     //--------------------------------------------------------------------------
     /// @brief      Destroys the object.
     ///
-    virtual ~Interface() = default;
+    virtual ~InterfaceWrapper() = default;
 
  protected:
     //--------------------------------------------------------------------------
@@ -57,17 +57,12 @@ class Interface {
     //--------------------------------------------------------------------------
     /// @brief      Service server handle for 'query_server' service.
     ///
-    ServiceServer _query_service;
+    ServiceServer _query_server_service;
 
     //--------------------------------------------------------------------------
-    /// @brief      Service server handle for 'start' service.
+    /// @brief      Service server handle for 'reset_connection' service.
     ///
-    ServiceServer _start_service;
-
-    //--------------------------------------------------------------------------
-    /// @brief      Service server handle for 'stop' service.
-    ///
-    ServiceServer _stop_service;
+    ServiceServer _reset_connection_service;
 
     //--------------------------------------------------------------------------
     /// @brief      Service callback for 'get_sensor_info' service.
@@ -88,26 +83,6 @@ class Interface {
     /// @return     Service call status, true if service was successfully called, false otherwise.
     ///
     bool queryServiceCallback(trignoclient_ros::Query::Request& request, trignoclient_ros::Query::Response& response);
-
-    //--------------------------------------------------------------------------
-    /// @brief      Service callback for 'get_sensor_info' service.
-    ///
-    /// @param      request   Service request instance [as std_srv::Trigger]
-    /// @param      response  Service response instance [as std_srv::Trigger]
-    ///
-    /// @return     Service call status, true if service was successfully called, false otherwise.
-    ///
-    bool startServiceCallback(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
-
-    //--------------------------------------------------------------------------
-    /// @brief      Service callback for 'get_sensor_info' service.
-    ///
-    /// @param      request   Service request instance [as std_srv::Trigger]
-    /// @param      response  Service response instance [as std_srv::Trigger]
-    ///
-    /// @return     Service call status, true if service was successfully called, false otherwise.
-    ///
-    bool stopServiceCallback(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 };
 
 
