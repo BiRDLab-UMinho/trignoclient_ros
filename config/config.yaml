@@ -1,8 +1,23 @@
-# trigno server address
-server_address = 127.0.0.1
-# emg & aux data ports (cf. Trigno SDK manual)
-# emg_data_port = 40051
-# aux_data_port = 40
-# tcp timeout
-connect_timeout = 5.0
-io_timeout = 1.0
+# netowrk parameters (connection to Trigno server)
+network:
+  # trigno server address
+  server_address: 127.0.0.1
+  # command interface port (cf. Trigno SDK manual)
+  command_port: 40051
+  # emg & aux data ports (cf. Trigno SDK manual)
+  emg_data_port: 40051
+  aux_data_port: 40052
+  # tcp timeout values:
+  connect_timeout: 5.0
+  io_timeout: 1.0
+
+# parameters associated with export operation (saving frames to file)
+export:
+  # target file prefix -> exported recordings placed within
+  target_root: "."
+  # remove frames after exporting
+  consume_input: true
+  # number of frames saved before commiting (closing & re-opening target file)
+  batch_size: 1000
+  # time to wait for new frames @ end of input data
+  idle_time: 10000
