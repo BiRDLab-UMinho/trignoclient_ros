@@ -1,7 +1,5 @@
-uint8 USE_LABEL = 0
-uint8 MAX_ID    = 16
-uint8 id      # sensor id (1-based, if > MAX_ID -> info on all active sensors is returned)
-string label  # sensor label (ignored over *id* if not USE_LABEL)
+#
+trignoclient_ros/Sensor sensor
 ---
 # note: no need for success flag -> returned sensor info array is empty if not successful
 trignoclient_ros/SensorInfo[] info

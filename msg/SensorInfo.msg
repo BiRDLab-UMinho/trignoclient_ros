@@ -1,5 +1,4 @@
 uint32 id               # base pair position
-string label            # custom user set label
 uint32 type             # sensor type (hardware-specific, cf. Trigno SDK Manual)
 uint32 mode             # configured operating mode (type-specific, cf. Trigno SDK Manual)
 string serial

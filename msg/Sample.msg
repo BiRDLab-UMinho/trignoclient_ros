@@ -1,3 +1,3 @@
-trignoclient_ros/SensorInfo info # detailed information about sensor
+trignoclient_ros/Sensor sensor # detailed information about sensor
 float32[] channels # multichannel sensor data
 
