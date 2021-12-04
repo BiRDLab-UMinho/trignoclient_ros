@@ -1,16 +1,15 @@
 #include <ros/ros.h>
-#include "trignoclient/network.hpp"
-#include "Interface.hpp"
-#include "DataPublisher.hpp"
-
-using namespace trigno;
+#include <trignoclient/trignoclient.hpp>
+#include "interface_wrapper.hpp"
+#include "data_wrapper.hpp"
+#include "bindings.hpp"
 
 void interruptHandler(int signum) {
     ros::shutdown();
 }
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
     signal(SIGINT, interruptHandler);
 
     ros::init(argc, argv, "trignoclient_ros", ros::init_options::NoSigintHandler);
@@ -20,13 +19,12 @@ int main(int argc, char const *argv[]) {
     trigno::network::Client trigno;
 
     // parametrize & initialize client from ROS parameters
-    trigno::ros::initialize(&trigno);
+    // ros::initializtrignoclient_e(:: &trigno);
 
     // instantiate ROS wrapper classes
-    ros::InterfaceWrapper interface(&handle, &trigno, "trigno");
-    ros::DataWrapper emg(&handle, &trigno.EMG, "emg");
-    ros::DataWrapper aux(&handle, &trigno.AUX, "aux");
-
+    trignoclient_ros::InterfaceWrapper interface(&handle, &trigno, "trigno");
+    trignoclient_ros::DataWrapper emg(&handle, &trigno.EMG, "emg");
+    trignoclient_ros::DataWrapper aux(&handle, &trigno.AUX, "aux");
 
     while (ros::ok()) {
         ros::spinOnce();

@@ -1,6 +1,6 @@
-trignoclient_ros/Sensor[] sensor # sensor descriptors to record
-std_msgs/Duration duration_ms # duration of recording. if <= 0.0, continuous (no auto-stop)
-string export_path # file to export data to. If empty, data is not exported
+trignoclient_ros/Sensor[] sensors # sensor descriptors to record
+duration time                     # duration of recording. if <= 0.0, continuous (no auto-stop)
+string file                       # file to export data to (relative to *target_root* param). If empty, data is not exported
 ---
 string message
 bool success

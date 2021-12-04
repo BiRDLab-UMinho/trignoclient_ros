@@ -1,14 +1,14 @@
-#ifndef TRIGNOCLIENTROS_INCLUDE_BASICPUBLISHER_HPP_
-#define TRIGNOCLIENTROS_INCLUDE_BASICPUBLISHER_HPP_
+#ifndef TRIGNOCLIENTROS_INCLUDE_INTERFACEWRAPPER_HPP_
+#define TRIGNOCLIENTROS_INCLUDE_INTERFACEWRAPPER_HPP_
 
 #include <string>
 #include <ros/ros.h>
 #include <std_srvs/Trigger.h>
 #include "trignoclient_ros/GetSensorInfo.h"
 #include "trignoclient_ros/Query.h"
-#include "trignoclient/network.hpp"
+#include <trignoclient/network.hpp>
 
-namespace trigno::ros {
+namespace trignoclient_ros {
 
 //------------------------------------------------------------------------------
 /// @brief      Class that (partially atm) exposes Trigno SDK interface to ROS. Allows basic system configuration and streaming management.
@@ -31,7 +31,7 @@ class InterfaceWrapper {
     /// @param[in]  client  Trigno client instance.
     /// @param[in]  name    Namespace to advertise service(s). Defaults to "[*node* namespace]/interface".
     ///
-    InterfaceWrapper(NodeHandle* node, const Client* client, const std::string& namespace = "interface");
+    InterfaceWrapper(ros::NodeHandle* node, Client* client, const std::string& name = "interface");
 
     //--------------------------------------------------------------------------
     /// @brief      Destroys the object.
@@ -42,27 +42,27 @@ class InterfaceWrapper {
     //--------------------------------------------------------------------------
     /// @brief      Handle to ROS node.
     ///
-    NodeHandle _node;
+    ros::NodeHandle* _node;
 
     //--------------------------------------------------------------------------
     /// @brief      Trigno data client (source).
     ///
-    Client _trigno;
+    Client* _client;
 
     //--------------------------------------------------------------------------
     /// @brief      Service server handle for 'get_sensor_info' service.
     ///
-    ServiceServer _get_sensor_info_service;
+    ros::ServiceServer _get_sensor_info_service;
 
     //--------------------------------------------------------------------------
     /// @brief      Service server handle for 'query_server' service.
     ///
-    ServiceServer _query_server_service;
+    ros::ServiceServer _query_server_service;
 
     //--------------------------------------------------------------------------
     /// @brief      Service server handle for 'reset_connection' service.
     ///
-    ServiceServer _reset_connection_service;
+    ros::ServiceServer _reset_connection_service;
 
     //--------------------------------------------------------------------------
     /// @brief      Service callback for 'get_sensor_info' service.
@@ -75,17 +75,26 @@ class InterfaceWrapper {
     bool getSensorInfoServiceCallback(trignoclient_ros::GetSensorInfo::Request& request, trignoclient_ros::GetSensorInfo::Response& response);
 
     //--------------------------------------------------------------------------
-    /// @brief      Service callback for 'get_sensor_info' service.
+    /// @brief      Service callback for 'query_server' service.
     ///
     /// @param      request   Service request instance [as trignoclient_ros::Query custom srv]
     /// @param      response  Service response instance [as trignoclient_ros::Query custom srv]
     ///
     /// @return     Service call status, true if service was successfully called, false otherwise.
     ///
-    bool queryServiceCallback(trignoclient_ros::Query::Request& request, trignoclient_ros::Query::Response& response);
+    bool queryServerServiceCallback(trignoclient_ros::Query::Request& request, trignoclient_ros::Query::Response& response);
+
+    //--------------------------------------------------------------------------
+    /// @brief      Service callback for 'reset_connection' service.
+    ///
+    /// @param      request   Service request instance [as std_srvs::Trigger]
+    /// @param      response  Service response instance [as std_srvs::Trigger]
+    ///
+    /// @return     Service call status, true if service was successfully called, false otherwise.
+    ///
+    bool resetConnectionServiceCallback(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 };
 
+}  // namespace trignoclient_ros
 
-}  // namespace trigno::ros
-
-#endif  // TRIGNOCLIENTROS_INCLUDE_BASICPUBLISHER_HPP_
+#endif  // TRIGNOCLIENTROS_INCLUDE_INTERFACEWRAPPER_HPP_

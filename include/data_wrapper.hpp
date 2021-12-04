@@ -1,11 +1,14 @@
-#ifndef TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_DATAWRAPPER_HPP_
-#define TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_DATAWRAPPER_HPP_
+#ifndef TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_TRIGNOTrignoDataWrapper_HPP_
+#define TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_TRIGNOTrignoDataWrapper_HPP_
 
 #include <string>
 #include <ros/ros.h>
-#include <trignoclient/trignoclient.hpp>
+#include <std_srvs/Trigger.h>
+#include <trignoclient/trignoclient.hpp>  // trigno::network::BasicDataClient
+#include "trignoclient_ros/Record.h"      // trignoclient_ros::Record
+#include "recorder_publisher.hpp"         // ros::RecorderPublisher
 
-namespace trigno::ros {
+namespace trignoclient_ros {
 
 //------------------------------------------------------------------------------
 /// @brief      Class that exposes *trignoclient* recording & exporting functionalities to ROS enviroment i.e.
@@ -14,31 +17,29 @@ namespace trigno::ros {
 class DataWrapper {
  public:
     //--------------------------------------------------------------------------
+    /// @brief      Data client type.
+    ///
+    using DataClient = trigno::network::BasicDataClient;
+
+    //--------------------------------------------------------------------------
     /// @brief      Constructs a new instance.
     ///
     /// @param      node    The node
     /// @param      client  The client
     /// @param[in]  name    The name
     ///
-    DataWrapper(ros::NodeHandle* node, trigno::network::BasicDataClient* client, const std::string& name);
+    DataWrapper(ros::NodeHandle* node, DataClient* client, const std::string& name);
 
     //--------------------------------------------------------------------------
     /// @brief      Destroys the object.
     ///
-    virtual ~DataWrapper() = default;
+    virtual ~DataWrapper();
 
  protected:
     //--------------------------------------------------------------------------
     /// @brief      Data/frame sequence.
     ///
     trigno::Sequence _data;
-
-    //--------------------------------------------------------------------------
-    /// @brief      Recording (timed) & publishing executor.
-    ///
-    /// @note       RecorderPublisher extends Recorder functionality, no need to have a dedicated Recorder.
-    ///
-    trigno::ros::RecorderPublisher _publisher;
 
     //--------------------------------------------------------------------------
     /// @brief      Data export executor.
@@ -51,6 +52,13 @@ class DataWrapper {
     ros::NodeHandle* _node;
 
     //--------------------------------------------------------------------------
+    /// @brief      Recording (timed) & publishing executor.
+    ///
+    /// @note       RecorderPublisher extends base Recorder functionality, no need to have an additional dedicated Recorder.
+    ///
+    RecorderPublisher _publisher;
+
+    //--------------------------------------------------------------------------
     /// @brief      ROS 'start' service.
     ///
     ros::ServiceServer _start_service;
@@ -59,8 +67,18 @@ class DataWrapper {
     /// @brief      ROS 'stop' service.
     ///
     ros::ServiceServer _stop_service;
+
+    //--------------------------------------------------------------------------
+    /// @brief      ROS 'start' service callback function.
+    ///
+    bool startServiceCallback(trignoclient_ros::Record::Request& request, trignoclient_ros::Record::Response& response);
+
+    //--------------------------------------------------------------------------
+    /// @brief      ROS 'stop' service callback function.
+    ///
+    bool stopServiceCallback(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 };
 
-}  // namespace trigno::ros
+}  // namespace ros
 
 #endif  // TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_DATAWAPPER_HPP_

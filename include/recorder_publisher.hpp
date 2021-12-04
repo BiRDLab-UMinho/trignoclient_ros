@@ -1,11 +1,11 @@
-#ifndef TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_DATAPUBLISHER_HPP_
-#define TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_DATAPUBLISHER_HPP_
+#ifndef TRIGNOCLIENTROS_INCLUDE_RECORDERPUBLISHER_HPP_
+#define TRIGNOCLIENTROS_INCLUDE_RECORDERPUBLISHER_HPP_
 
 #include <string>
 #include <ros/ros.h>
-#include "trignoclient/trignoclient.hpp"  // trigno::network::BasicDataClient, trigno::tools::Recorder
+#include <trignoclient/trignoclient.hpp>  // trigno::network::BasicDataClient, trigno::tools::Recorder
 
-namespace trigno::ros {
+namespace trignoclient_ros {
 
 //------------------------------------------------------------------------------
 /// @brief      Publisher class that extends trigno::tools::Recorder to provide a ROS interface,
@@ -32,7 +32,7 @@ class RecorderPublisher : public trigno::tools::Recorder {
 
  protected:
     //--------------------------------------------------------------------------
-    /// @brief      Reads & exports a single *DataFrame* from the data client.
+    /// @brief      Reads & exports a single *Frame* from the data client.
     ///
     void execute() override;
 
@@ -42,7 +42,7 @@ class RecorderPublisher : public trigno::tools::Recorder {
     ros::Publisher _publisher;
 };
 
-}  // namespace trigno::ros
+}  // namespace trignoclient_ros
 
-#endif  // TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_DATAPUBLISHER_HPP_
+#endif  // TRIGNOCLIENTROS_INCLUDE_RECORDERPUBLISHER_HPP_
 

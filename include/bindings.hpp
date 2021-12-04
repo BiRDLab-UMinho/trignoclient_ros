@@ -7,46 +7,20 @@
 ///
 //------------------------------------------------------------------------------
 
-#ifndef TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_BINDINGS_HPP_
-#define TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_BINDINGS_HPP_
+#ifndef TRIGNOCLIENTROS_INCLUDE_BINDINGS_HPP_
+#define TRIGNOCLIENTROS_INCLUDE_BINDINGS_HPP_
 
 #include <string>
 #include <vector>
 #include <ros/ros.h>
-#include "trignoclient/network.hpp"  // trigno::Frame, trigno::network::SensorInfo
+#include <trignoclient/trignoclient.hpp>  // trigno::Frame, trigno::network::SensorInfo
+#include "trignoclient_ros/Sample.h"
+#include "trignoclient_ros/BaseInfo.h"
 #include "trignoclient_ros/SensorInfo.h"
 #include "trignoclient_ros/Frame.h"
 #include "trignoclient_ros/FrameStamped.h"
 
-#ifndef DEFAULT_CMD_PORT
-#define DEFAULT_CMD_PORT 50040
-#endif
-
-#ifndef DEFAULT_CMD_PORT
-#define DEFAULT_CMD_PORT 50040
-#endif
-
-#ifndef DEFAULT_CMD_PORT
-#define DEFAULT_CMD_PORT 50040
-#endif
-
-#ifndef DEFAULT_CONNECT_TIMEOUT
-#define DEFAULT_CONNECT_TIMEOUT 5000
-#endif
-
-#ifndef DEFAULT_EXPORT_BATCH
-#define DEFAULT_EXPORT_BATCH 1000
-#endif
-
-#ifndef DEFAULT_IO_TIMEOUT
-#define DEFAULT_IO_TIMEOUT 500
-#endif
-
-#ifndef DEFAULT_IDLE_TIMEOUT
-#define DEFAULT_IDLE_TIMEOUT 10000
-#endif
-
-namespace trigno::ros {
+namespace trignoclient_ros {
 
 //------------------------------------------------------------------------------
 /// @brief      Configures & resets a Client instance.
@@ -56,33 +30,15 @@ namespace trigno::ros {
 ///
 inline void initialize(ros::NodeHandle* node, trigno::network::Client* client) {
     auto address  = node->param< std::string >("network/server_address", "127.0.0.1");
-    auto cmd_port = node->param< int >("network/command_port", DEFAULT_CMD_PORT);
-    auto emg_port = node->param< int >("network/emg_data_port", DEFAULT_EMG_PORT);
-    auto aux_port = node->param< int >("network/aux_data_port", DEFAULT_AUX_PORT);
-    auto timeout  = node->param< int >("network/connect_timeout", DEFAULT_CONNECT_TIMEOUT);
+    auto cmd_port = node->param< int >("network/command_port",trigno::network::ConnectionConfiguration::COMMAND_PORT);
+    auto emg_port = node->param< int >("network/emg_data_port",trigno::network::ConnectionConfiguration::EMG_DATA_PORT);
+    auto aux_port = node->param< int >("network/aux_data_port",trigno::network::ConnectionConfiguration::AUX_DATA_PORT);
+    auto timeout  = node->param< int >("network/connect_timeout",trigno::network::ConnectionConfiguration::CONNECT_TIMEOUT);
     // reset network connection
     // client->shutdown();
-    client->initialize(address, cmd_port, emg_port, aux_port, trigno::Duration(timeout));
+    client->initialize(address, cmd_port, emg_port, aux_port,trigno::Duration(timeout));
 }
 
-
-
-//------------------------------------------------------------------------------
-/// @brief      Parametrizes an exporter though the ROS parameter server.
-///
-/// @param      node      Parent node used to fetch parameters (parameter names are parsed according to node name if private handle).
-/// @param      exporter  Exporter instance to configure
-///
-inline void parametrize(ros::NodeHandle* node, trigno::tools::Exporter* exporter, size_t* batch_size) {
-    // set target file (defaults to home folder)
-    auto target_root = node->param< std::string >("export/target_root", "~");
-    _exporter.target(target_root + "/" + target_file);
-    // eval consume flag (defaults to true!)
-    auto consume = node->param< bool >("export/consume_input", true);
-    _exporter.source(consume ? &_data : nullptr);
-    // fetch export batch parameter (range in which to write data to disk, )
-    node->param< int >("export_batch_size", *batch_size, DEFAULT_EXPORT_BATCH);
-}
 
 
 
@@ -94,14 +50,40 @@ inline void parametrize(ros::NodeHandle* node, trigno::tools::Exporter* exporter
 /// @return     List of sensor (IDs) matching valid inputs.
 ///
 inline trigno::sensor::List sensors(const std::vector< trignoclient_ros::Sensor >& sensors) {
-    trigno::sensor::List out;
+   trigno::sensor::List out;
     for (const auto& sensor : sensors) {
-        if (sensor.id < trigno::sensor::ID::MAX) {
+        if (sensor.id <trigno::sensor::ID::MAX) {
             continue;
         }
-        out.emplace_back(static_cast< trigno::sensor::ID >(sensor.id));
+        out.emplace_back(static_cast<trigno::sensor::ID >(sensor.id));
     }
     return out;
+}
+
+
+
+//------------------------------------------------------------------------------
+/// @brief      Creates a trigno duration-type (chrono-based) from a ROS duration object.
+///
+/// @param[in]  time  ROS duration instance.
+///
+inline trigno::Duration duration(const ros::Duration& time) {
+    auto out = trigno::Duration(time.nsec / 1000000 /* trigno duration -> chrono::milliseconds */) +
+               trigno::Duration(time.sec * 1000     /* trigno duration -> chrono::milliseconds */);
+    return out;
+}
+
+
+
+//------------------------------------------------------------------------------
+/// @brief      Converts a sensor ID to its associated ROS message.
+///
+/// @param[in]  info  Input sensor ID, astrigno::sensor::ID
+///
+inline trignoclient_ros::Sensor msg(const trigno::sensor::ID sensor_id) {
+    trignoclient_ros::Sensor sensor_msg;
+    sensor_msg.id = sensor_id;
+    return sensor_msg;
 }
 
 
@@ -113,7 +95,7 @@ inline trigno::sensor::List sensors(const std::vector< trignoclient_ros::Sensor 
 ///
 /// @return     Newly instantiated trignoclient_ros::SensorInfo message structure.
 ///
-inline trignoclient_ros::SensorInfo msg(const trigno::network::SensorInfo& info) {
+inline trignoclient_ros::SensorInfo msg(const trigno::network::SensorConfiguration& info) {
     trignoclient_ros::SensorInfo out;
 
     out.id = info.id();
@@ -141,7 +123,7 @@ inline trignoclient_ros::SensorInfo msg(const trigno::network::SensorInfo& info)
 ///
 /// @return     Newly instantiated trignoclient_ros::BaseInfo message structure.
 ///
-inline trignoclient_ros::BaseInfo msg(const trigno::network::BaseInfo& info) {
+inline trignoclient_ros::BaseInfo msg(const trigno::network::BaseInformation& info) {
     trignoclient_ros::BaseInfo out;
 
     out.serial = info.serial();
@@ -151,7 +133,7 @@ inline trignoclient_ros::BaseInfo msg(const trigno::network::BaseInfo& info) {
 }
 
 
-// ... SystemControl, ConnectionInfo, etc
+// @todo ... SystemControl, ConnectionInfo, etc msg converters!
 
 
 //------------------------------------------------------------------------------
@@ -186,9 +168,9 @@ inline trignoclient_ros::Frame msg(const trigno::Frame& frame) {
 
     for (size_t idx = 0; idx < frame.size(); idx++) {
         // create instance @ end of frame
-        out.emplace_back(msg(frame[idx]));
+        out.sensor.emplace_back(msg(frame[idx]));
         // assign label
-        out.back().sensor.label = frame.key(idx)
+        out.sensor.back().sensor.label = frame.key(idx);
     }
 
     return out;
@@ -206,12 +188,12 @@ inline trignoclient_ros::Frame msg(const trigno::Frame& frame) {
 inline trignoclient_ros::FrameStamped msg(const trigno::Frame::Stamped& frame) {
     trignoclient_ros::FrameStamped out;
 
-    out.header.stamp = frame.key;
+    out.header.stamp = ros::Time(frame.key);
     out.data = msg(frame.get());
 
     return out;
 }
 
-}  // namespace trigno::ros
+}  // namespace trignoclient_ros
 
 #endif  // TRIGNOCLIENTROS_INCLUDE_TRIGNOCLIENTROS_BINDINGS_HPP_

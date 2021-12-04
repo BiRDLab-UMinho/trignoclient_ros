@@ -1,5 +1,5 @@
-#
-trignoclient_ros/Sensor sensor
+trignoclient_ros/Sensor[] sensors
+duration timeout
 ---
 # note: no need for success flag -> returned sensor info array is empty if not successful
 trignoclient_ros/SensorInfo[] info
