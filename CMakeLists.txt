@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(trignoclient_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++14)
+add_compile_options(-std=c++17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -14,13 +14,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # dependencies
-find_package(catkin REQUIRED COMPONENTS roscpp std_srvs)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(catkin REQUIRED COMPONENTS roscpp std_srvs message_generation)
+find_package(trignoclient REQUIRED)
 
-if("${Boost_FIND_VERSION}" VERSION_LESS "1.66.1")
-	add_definitions(-DBOOST_LEGACY_VERSION)
-	# add_compile_definitions(BOOST_LEGACY_VERSION)
-endif()
+#if("${Boost_FIND_VERSION}" VERSION_LESS "1.66.1")
+#	add_definitions(-DBOOST_LEGACY_VERSION)
+#	# add_compile_definitions(BOOST_LEGACY_VERSION)
+#endif()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -54,6 +54,10 @@ endif()
 ## Generate messages in the 'msg' folder
 add_message_files(
     FILES
+    Sample.msg
+    Sensor.msg
+    BaseInfo.msg
+    SensorInfo.msg
     Frame.msg
     FrameStamped.msg
 )
@@ -63,12 +67,13 @@ add_service_files(
     FILES
     GetSensorInfo.srv
     Query.srv
+    Record.srv
 )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
+  std_msgs  # Or other packages containing msgs	
 )
 
 
@@ -83,6 +88,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
     CATKIN_DEPENDS message_runtime
+    DEPENDS trignoclient
 )
 
 ###########
@@ -94,13 +100,16 @@ catkin_package(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node
     src/main_node.cpp
-    src/emg_publisher.cpp
-    src/aux_publisher.cpp
+    src/data_wrapper.cpp
+    src/interface_wrapper.cpp
+    src/recorder_publisher.cpp
 )
 
-include_directories(include
+target_include_directories(${PROJECT_NAME}_node PRIVATE
+    include
     ${Boost_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
+    ${trignoclient_INCLUDE_DIRS}
 )
 
 ## Rename C++ executable without prefix
@@ -122,8 +131,8 @@ add_dependencies(${PROJECT_NAME}_node
 )
 
 # link binary to backend library
-target_link_libraries(${PROJECT_NAME}_node
-    ${TRIGNOCLIENT_PATH}/libtrignoclient.so
+target_link_libraries(${PROJECT_NAME}_node PRIVATE 
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${trignoclient_LIBRARIES} trignoclient::trignoclient
 )
